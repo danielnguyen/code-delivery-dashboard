@@ -1,0 +1,7 @@
+teams:
+  - id: credential-management
+    name: Credential Management
+    mots_modules:
+      - password_manager
+      - form_autofill
+    workstreams: []
