@@ -1,0 +1,38 @@
+updated_at: '2026-07-20T21:41:23.943277+00:00'
+modules:
+  - machine_name: firefox_root
+    name: Firefox Root
+    owners:
+      - nick: example-owner
+    submodules:
+      - name: Password Manager
+        description: Managing, saving and filling logins.
+        includes:
+          - toolkit/components/passwordmgr/**/*
+          - browser/components/aboutlogins/**/*
+        excludes:
+          - toolkit/components/passwordmgr/test-only/**/*
+        meta:
+          components:
+            - Toolkit::Password Manager
+            - Firefox::about:logins
+          review_group: password-reviewers
+          private_raw_field: not-part-of-the-domain
+        owners:
+          - nick: synthetic-owner
+        machine_name: password_manager
+      - name: Form Autofill
+        description: Form detection and autocomplete.
+        includes:
+          - browser/extensions/formautofill/**/*
+          - toolkit/components/autocomplete/**/*
+        excludes:
+          - browser/extensions/formautofill/test-only/**/*
+        meta:
+          components:
+            - Toolkit::Autocomplete
+            - Toolkit::Form Autofill
+        machine_name: form_autofill
+      - name: Near match only
+        machine_name: password_manager_extra
+        includes:
