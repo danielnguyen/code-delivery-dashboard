@@ -9,12 +9,25 @@ interface DashboardProps {
   motsResult: MotsSourceResult;
 }
 
-function formatTimestamp(timestamp: string): string {
+function formatTimestamp(timestamp: string): string | null {
+  const date = new Date(timestamp);
+  if (Number.isNaN(date.getTime())) return null;
+
   return new Intl.DateTimeFormat("en", {
     dateStyle: "medium",
     timeStyle: "short",
     timeZone: "UTC",
-  }).format(new Date(timestamp)) + " UTC";
+  }).format(date) + " UTC";
+}
+
+function Timestamp({ value }: { value: string }) {
+  const formatted = formatTimestamp(value);
+
+  return formatted ? (
+    <time dateTime={value}>{formatted}</time>
+  ) : (
+    <span>Invalid timestamp</span>
+  );
 }
 
 function SourceStatus({ result, selectedTeamId }: { result: MotsSourceResult; selectedTeamId: string }) {
@@ -52,10 +65,10 @@ function SourceStatus({ result, selectedTeamId }: { result: MotsSourceResult; se
       </div>
       <div className="freshness">
         <span>Last acquisition attempt</span>
-        <time dateTime={result.acquiredAt}>{formatTimestamp(result.acquiredAt)}</time>
+        <Timestamp value={result.acquiredAt} />
         {result.sourceUpdatedAt ? (
           <small>
-            Source updated <time dateTime={result.sourceUpdatedAt}>{formatTimestamp(result.sourceUpdatedAt)}</time>
+            Source updated <Timestamp value={result.sourceUpdatedAt} />
           </small>
         ) : null}
         <form action="/" method="get">
@@ -200,7 +213,7 @@ export function Dashboard({ teams, selectedTeam, motsResult }: DashboardProps) {
               ["Active patches", "Bugzilla not connected"],
               ["External review waits", "Phabricator not connected"],
               ["Median review queue", "Phabricator not connected"],
-              ["Current diffs accepted", "Landing state not connected"],
+              ["Current diffs accepted", "Phabricator not connected"],
             ].map(([label, state]) => (
               <article className="stat-card" key={label}>
                 <span>{label}</span>

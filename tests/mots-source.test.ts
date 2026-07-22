@@ -73,6 +73,48 @@ describe("MOTS acquisition", () => {
     expect(result.team.modules[0]).not.toHaveProperty("owners");
   });
 
+  it("accepts the current Firefox timestamp form with an offset and long fractional seconds", async () => {
+    const result = await acquireMotsForTeam(team, {
+      fetchImpl: responseFetch(fixture),
+      now,
+    });
+
+    expect(result).toMatchObject({
+      status: "available",
+      sourceUpdatedAt: "2026-07-20T21:41:23.943277+00:00",
+    });
+  });
+
+  it("allows source data without an updated_at timestamp", async () => {
+    const sourceWithoutTimestamp = fixture.replace(/^updated_at:[^\n]*\n/, "");
+
+    const result = await acquireMotsForTeam(team, {
+      fetchImpl: responseFetch(sourceWithoutTimestamp),
+      now,
+    });
+
+    expect(result.status).toBe("available");
+    expect(result.sourceUpdatedAt).toBeUndefined();
+  });
+
+  it("classifies a malformed updated_at timestamp as invalid source data", async () => {
+    const sourceWithInvalidTimestamp = fixture.replace(
+      /^updated_at:[^\n]*\n/,
+      "updated_at: definitely-not-a-timestamp\n",
+    );
+
+    const result = await acquireMotsForTeam(team, {
+      fetchImpl: responseFetch(sourceWithInvalidTimestamp),
+      now,
+    });
+
+    expect(result).toMatchObject({
+      status: "invalid_source_data",
+      error: { code: "schema" },
+    });
+    expect(result).not.toHaveProperty("team");
+  });
+
   it("returns no partial team when a configured module is missing", async () => {
     const result = await acquireMotsForTeam(
       { ...team, motsModules: ["password_manager", "missing_module"] },

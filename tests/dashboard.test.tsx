@@ -61,7 +61,12 @@ describe("dashboard", () => {
     expect(screen.getAllByText("Bugzilla not connected").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Phabricator not connected").length).toBeGreaterThan(0);
     expect(screen.getByText("Patch journey unavailable until a workstream is selected")).toBeVisible();
-    expect(screen.getAllByText("Landing state not connected").length).toBeGreaterThan(0);
+
+    const currentDiffsCard = screen.getByText("Current diffs accepted").closest("article");
+    expect(currentDiffsCard).not.toBeNull();
+    if (!currentDiffsCard) throw new Error("Expected Current diffs accepted card");
+    expect(within(currentDiffsCard).getByText("Phabricator not connected")).toBeVisible();
+    expect(within(currentDiffsCard).queryByText("Landing state not connected")).not.toBeInTheDocument();
 
     const patchTable = screen.getByRole("table");
     expect(within(patchTable).queryByText(/D\d+/)).not.toBeInTheDocument();
@@ -87,5 +92,22 @@ describe("dashboard", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("No fixture or stale data was substituted");
     expect(screen.queryByRole("heading", { name: "Password Manager" })).not.toBeInTheDocument();
     expect(screen.getByText(/Module details are unavailable/)).toBeVisible();
+  });
+
+  it("renders malformed timestamp evidence defensively without throwing", () => {
+    expect(() =>
+      render(
+        <Dashboard
+          teams={[team]}
+          selectedTeam={team}
+          motsResult={{
+            ...availableResult,
+            sourceUpdatedAt: "definitely-not-a-timestamp",
+          }}
+        />,
+      ),
+    ).not.toThrow();
+
+    expect(screen.getByText("Invalid timestamp")).toBeVisible();
   });
 });

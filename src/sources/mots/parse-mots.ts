@@ -39,7 +39,7 @@ const rawMotsModuleSchema: z.ZodType<RawMotsModule> = z.lazy(() =>
 
 const rawMotsDocumentSchema = z
   .object({
-    updated_at: z.string().optional(),
+    updated_at: z.iso.datetime({ offset: true }).optional(),
     modules: z.array(rawMotsModuleSchema).min(1),
   })
   .passthrough();

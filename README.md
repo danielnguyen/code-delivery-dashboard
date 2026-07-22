@@ -18,7 +18,7 @@ This boundary does **not** complete the full first executable product in the spe
 
 ## Prerequisites
 
-- Node.js 20.9 or newer
+- Node.js 20.19 or newer on the Node 20 line, Node.js 22.13 or newer on the Node 22 line, or Node.js 24 or newer
 - npm
 - network access from the Next.js server to the public live MOTS source
 
